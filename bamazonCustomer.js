@@ -76,7 +76,7 @@ function userPrompt() {
         {
             type: "input",
             name: "userItem",
-            message: "Please enter the 4-digit item number you are interested in."
+            message: "Please enter the 4-digit item number you are interested in buying."
         },
 
         {
