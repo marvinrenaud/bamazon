@@ -25,7 +25,7 @@ function managerWelcome() {
     console.log("");
 };
 
-// Function below prompts the user for what they would like
+// Function below prompts the manager for what they would like to do
 function userPrompt() {
     inquirer.prompt([
 
@@ -33,26 +33,23 @@ function userPrompt() {
             type: "list",
             name: "managerSelection",
             message: "What would you like to do boss?",
-            choices: ["View Kicks We Have for Sale", "View Kicks That Have Low Inventory", "Add Inventory to Current Kicks", "Add a New Dope Item to Our Selection"]
+            choices: ["View Kicks We Have for Sale", "View Kicks That Have Low Inventory", "Add Inventory to Current Kicks", "Add a New Dope Pair of Kicks to Our Selection"]
         }
 
     ]).then(function(userResponse) {
         switch (userResponse.managerSelection) {
+          // Each case runs a specific function to execute the task that was selected
             case "View Kicks We Have for Sale":
-                console.log("Option 1 working");
                 displayInventory();
                 break;
             case "View Kicks That Have Low Inventory":
-                console.log("Option 2 working");
                 displayLowInventory();
                 break;
             case "Add Inventory to Current Kicks":
-                console.log("Option 3 working");
                 addInventory();
                 break;
             case "Add a New Dope Pair of Kicks to Our Selection":
-                console.log("Option 4 working");
-
+                newInventory();
                 break;
             default:
                 console.log("Pick a legitimate options bro!");
@@ -123,43 +120,91 @@ function displayLowInventory() {
 function addInventory() {
     inquirer.prompt([
 
-            {
-                type: "input",
-                name: "itemSelected",
-                message: "Enter the item number for the kicks you will add inventory to."
-            },
+        {
+            type: "input",
+            name: "itemSelected",
+            message: "Enter the item number for the kicks you will add inventory to."
+        },
 
-            {
-                type: "input",
-                name: "additionalQuantity",
-                message: "Cool! Enter the number of these kicks you will add to inventory."
-            }
+        {
+            type: "input",
+            name: "additionalQuantity",
+            message: "Cool! Enter the number of these kicks you will add to inventory."
+        }
 
-        ]).then(function(userResponse) {
-                console.log("");
-                console.log("-----------------------------------------------------------------");
-                console.log("Cool! We've added ", userResponse.additionalQuantity, " kicks to Item #", userResponse.itemSelected);
-                console.log("-----------------------------------------------------------------");
-                console.log("");
+    ]).then(function(userResponse) {
+        console.log("");
+        console.log("------------------------------------------------");
+        console.log("Cool! We've added ", userResponse.additionalQuantity, " kicks to Item #", userResponse.itemSelected);
+        console.log("------------------------------------------------");
+        console.log("");
 
-                // Query action below adds the select volume to the selected item
-                connection.query("UPDATE productstable SET stock_quantity= stock_quantity +? WHERE item_id = ?;", [userResponse.additionalQuantity, userResponse.itemSelected], function(err, res) {
-                    if (err) throw err;
+        // Query action below adds the select volume to the selected item
+        connection.query("UPDATE productstable SET stock_quantity= stock_quantity +? WHERE item_id = ?;", [userResponse.additionalQuantity, userResponse.itemSelected], function(err, res) {
+            if (err) throw err;
 
-                    // Instantiate CLI table
-                    var table = new Table({
-                        head: ['Item', 'Product Name', 'Price', 'Avail.'],
-                        colWidths: [10, 20, 10, 10]
-                    });
-
-                    displayInventory();
-                });
+            // Instantiate CLI table
+            var table = new Table({
+                head: ['Item', 'Product Name', 'Price', 'Avail.'],
+                colWidths: [10, 20, 10, 10]
             });
-          };
+
+            displayInventory();
+        });
+    });
+};
+
+// Function below prompts the manager to enter details for the kicks they want to add inventory
+function newInventory() {
+    inquirer.prompt([
+
+        {
+            type: "input",
+            name: "newProductName",
+            message: "What is the name of the new kicks you want to add to inventory?"
+        },
+
+        {
+            type: "input",
+            name: "newDepartment",
+            message: "Which department are these kicks in?"
+        },
+        {
+            type: "input",
+            name: "newPrice",
+            message: "How much are we charging for the kicks?"
+        },
+        {
+            type: "input",
+            name: "newQuantity",
+            message: "How many of these new kicks do we have?"
+        }
+    ]).then(function(userResponse) {
+        console.log("");
+        console.log("------------------------------------------------");
+        console.log("Cool! We've added ", userResponse.newQuantity, " of the ", userResponse.newProductName, " to our inventory.");
+        console.log("------------------------------------------------");
+        console.log("");
+
+        // Query action below adds the select volume to the selected item
+        connection.query("INSERT INTO productstable ( product_name, department_name, price, stock_quantity) VALUES (?, ?, ?, ?);", [userResponse.newProductName, userResponse.newDepartment, userResponse.newPrice, userResponse.newQuantity], function(err, res) {
+            if (err) throw err;
+
+            // Instantiate CLI table
+            var table = new Table({
+                head: ['Item', 'Product Name', 'Price', 'Avail.'],
+                colWidths: [10, 20, 10, 10]
+            });
+
+            displayInventory();
+        });
+    });
+};
 
 
 
 
-            // Run initial functions
-            managerWelcome();
-            userPrompt();
+
+// Run initial functions
+managerWelcome();
+userPrompt();
